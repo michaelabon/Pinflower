@@ -74,8 +74,9 @@ namespace Pinflower
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            player.Update(gameTime);
             player.ApplyPhysics(gameTime);
+            player.Update(gameTime);
+            
             base.Update(gameTime);
         }
 

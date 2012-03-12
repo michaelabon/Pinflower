@@ -68,7 +68,7 @@ namespace Pinflower
             spriteSet = "Textures/" + spriteSet + "/";
             
             runLeftAnim = new Animation(game.Content.Load<Texture2D>(spriteSet + "RunLeft"), 0.08f, true);
-            idleAnim = new Animation(game.Content.Load<Texture2D>(spriteSet + "Idle"), 0.5f, true);
+            idleAnim = new Animation(game.Content.Load<Texture2D>(spriteSet + "Idle"), 0.2f, true);
             sprite.PlayAnimation(idleAnim);
         }
 
@@ -219,15 +219,15 @@ namespace Pinflower
             SpriteEffects flip = direction > 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
             sprite.Draw(gameTime, spriteBatch, new Vector2(PinflowerGame.viewportWidth / 2, PinflowerGame.viewportHeight / 2), flip);
         }
-
-        /*public int Width
+    
+        public int Width
         {
-            get { return PlayerTexture.Width; }
+            get { return sprite.Animation.FrameWidth; }
         }
 
         public int Height
         {
-            get { return PlayerTexture.Height; }
-        }*/
+            get { return sprite.Animation.FrameWidth; }
+        }
     }
 }
