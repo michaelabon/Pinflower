@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 
 namespace Pinflower
 {
@@ -19,10 +11,16 @@ namespace Pinflower
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Player player;
+        World world;
+        public const int viewportWidth = 64 * 4 * 3;
+        public const int viewportHeight = 64 * 4 * 3;
 
         public PinflowerGame()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferHeight = viewportHeight;
+            graphics.PreferredBackBufferWidth = viewportWidth;
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
 
@@ -36,6 +34,7 @@ namespace Pinflower
         {
             // TODO: Add your initialization logic 
             player = new Player();
+            world = new World();
             base.Initialize();
         }
 
@@ -48,7 +47,13 @@ namespace Pinflower
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            Texture2D texture;
+            // Load world
+            //System.Drawing.Bitmap bitmap = (System.Drawing.Bitmap)System.Drawing.Bitmap.FromFile(@"Content\Textures\Worlds\descend.bmp");
+            texture = Content.Load<Texture2D>(@"Textures\Worlds\descend");
+            world.Initialize(this, texture);
+
+            // Load player
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + (GraphicsDevice.Viewport.TitleSafeArea.Height / 2));
             player.Initialize(this, playerPosition);
         }
@@ -79,13 +84,12 @@ namespace Pinflower
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
 
             base.Draw(gameTime);
 
             spriteBatch.Begin();
+            world.Draw(spriteBatch, player.Position);
             player.Draw(gameTime, spriteBatch);
             spriteBatch.End();
         }
