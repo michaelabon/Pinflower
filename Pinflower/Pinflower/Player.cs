@@ -8,9 +8,11 @@ namespace Pinflower
     {
         protected PinflowerGame game;
         public Vector2 Position;
+        public Vector2 Velocity;
         KeyboardState currentKeyboardState;
         KeyboardState previousKeyboardState;
-        float playerSpeed = 6.0f;
+        Vector2 playerSpeed = new Vector2(6.0f, 0);
+        Vector2 zero = new Vector2(0, 0);
 
         Animation runLeftAnim; // only need the left as we're going to flip it for the right
         Animation idleAnim;
@@ -58,22 +60,25 @@ namespace Pinflower
             if ((currentKeyboardState.IsKeyDown(Keys.D) || currentKeyboardState.IsKeyDown(Keys.Right)) 
                 && (currentKeyboardState.IsKeyDown(Keys.A) || currentKeyboardState.IsKeyDown(Keys.Left)))
             {
+                this.Velocity = zero;
                 this.direction = -1;
             }
             else if (currentKeyboardState.IsKeyDown(Keys.D) || currentKeyboardState.IsKeyDown(Keys.Right))
             {
-                this.Position.X += this.playerSpeed;
+                this.Velocity = this.playerSpeed;
                 this.direction = 1;
             }
             else if (currentKeyboardState.IsKeyDown(Keys.A) || currentKeyboardState.IsKeyDown(Keys.Left))
             {
-                this.Position.X -= this.playerSpeed;
+                this.Velocity = -this.playerSpeed;
                 this.direction = 0;
             }
             else
             {
+                this.Velocity = zero;
                 this.direction = -1;
             }
+            this.Position += this.Velocity;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -87,14 +92,19 @@ namespace Pinflower
             sprite.Draw(gameTime, spriteBatch, new Vector2(PinflowerGame.viewportWidth / 2, PinflowerGame.viewportHeight / 2), flip);
         }
 
-        /*public int Width
+        public int Width
         {
-            get { return PlayerTexture.Width; }
+            get { return 64; }
         }
 
         public int Height
         {
-            get { return PlayerTexture.Height; }
-        }*/
+            get { return 64; }
+        }
+
+        public Rectangle BoundingBox
+        {
+            get { return new Rectangle((int)Position.X - (Width / 2), (int)Position.Y - (Height / 2), Width, Height); }
+        }
     }
 }

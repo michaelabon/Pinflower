@@ -14,6 +14,7 @@ namespace Pinflower
         World world;
         public const int viewportWidth = 64 * 4 * 3;
         public const int viewportHeight = 64 * 4 * 3;
+        SpriteFont font;
 
         public PinflowerGame()
         {
@@ -54,8 +55,11 @@ namespace Pinflower
             world.Initialize(this, player, texture);
 
             // Load player
-            Vector2 playerPosition = new Vector2(-texture.Width/2, -texture.Height/2);
+            Vector2 playerPosition = new Vector2(-200, -220);
             player.Initialize(this, playerPosition);
+
+            // Load font
+            font = Content.Load<SpriteFont>(@"Fonts\Courier New");
         }
 
         /// <summary>
@@ -75,6 +79,7 @@ namespace Pinflower
         protected override void Update(GameTime gameTime)
         {
             player.Update(gameTime);
+            world.Update();
             base.Update(gameTime);
         }
 
@@ -92,7 +97,19 @@ namespace Pinflower
             spriteBatch.Begin();
             world.Draw(spriteBatch);
             player.Draw(gameTime, spriteBatch);
+
+            string posText = "Pos: " + player.Position.X + ", " + player.Position.Y;
+            DrawString(posText, 12, 12);
+            string velText = "Vel: " + player.Velocity.X + ", " + player.Velocity.Y;
+            DrawString(velText, 12, 42);
+            
             spriteBatch.End();
+        }
+
+        protected void DrawString(string text, int x, int y)
+        {
+            spriteBatch.DrawString(font, text, new Vector2(x + 2, y + 2), Color.SlateGray);
+            spriteBatch.DrawString(font, text, new Vector2(x, y), Color.White);
         }
     }
 }
