@@ -70,6 +70,7 @@ namespace Pinflower
         protected override void Update(GameTime gameTime)
         {
             player.Update(gameTime);
+            player.ApplyPhysics(gameTime);
             base.Update(gameTime);
         }
 
