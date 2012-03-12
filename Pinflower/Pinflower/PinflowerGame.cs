@@ -51,10 +51,10 @@ namespace Pinflower
             // Load world
             //System.Drawing.Bitmap bitmap = (System.Drawing.Bitmap)System.Drawing.Bitmap.FromFile(@"Content\Textures\Worlds\descend.bmp");
             texture = Content.Load<Texture2D>(@"Textures\Worlds\descend");
-            world.Initialize(this, texture);
+            world.Initialize(this, player, texture);
 
             // Load player
-            Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + (GraphicsDevice.Viewport.TitleSafeArea.Height / 2));
+            Vector2 playerPosition = new Vector2(-texture.Width/2, -texture.Height/2);
             player.Initialize(this, playerPosition);
         }
 
@@ -84,12 +84,13 @@ namespace Pinflower
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
+            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.DarkSlateGray);
 
             base.Draw(gameTime);
 
+
             spriteBatch.Begin();
-            world.Draw(spriteBatch, player.Position);
+            world.Draw(spriteBatch);
             player.Draw(gameTime, spriteBatch);
             spriteBatch.End();
         }
