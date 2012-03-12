@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Pinflower
 {
-    class Player
+    public class Player
     {
         protected PinflowerGame game;
         public Vector2 Position;
@@ -182,17 +179,18 @@ namespace Pinflower
             if (currentKeyboardState.IsKeyDown(Keys.Escape)) { game.Exit(); }
 
             // GAME LOGICf!~
-            if (currentKeyboardState.IsKeyDown(Keys.D) && currentKeyboardState.IsKeyDown(Keys.A))
+            if ((currentKeyboardState.IsKeyDown(Keys.D) || currentKeyboardState.IsKeyDown(Keys.Right)) 
+                && (currentKeyboardState.IsKeyDown(Keys.A) || currentKeyboardState.IsKeyDown(Keys.Left)))
             {
                 this.movement = 0;
                 this.direction = -1;
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.D))
+            else if (currentKeyboardState.IsKeyDown(Keys.D) || currentKeyboardState.IsKeyDown(Keys.Right))
             {
                 this.movement = 1;
                 this.direction = 1;
             }
-            else if (currentKeyboardState.IsKeyDown(Keys.A))
+            else if (currentKeyboardState.IsKeyDown(Keys.A) || currentKeyboardState.IsKeyDown(Keys.Left))
             {
                 this.movement = -1;
                 this.direction = 0;
@@ -219,7 +217,7 @@ namespace Pinflower
             }
 
             SpriteEffects flip = direction > 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-            sprite.Draw(gameTime, spriteBatch, Position, flip);
+            sprite.Draw(gameTime, spriteBatch, new Vector2(PinflowerGame.viewportWidth / 2, PinflowerGame.viewportHeight / 2), flip);
         }
 
         /*public int Width
