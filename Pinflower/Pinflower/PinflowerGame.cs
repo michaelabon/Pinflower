@@ -50,8 +50,7 @@ namespace Pinflower
 
             // TODO: use this.Content to load your game content here
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + (GraphicsDevice.Viewport.TitleSafeArea.Height / 2));
-            Texture2D texture = Content.Load<Texture2D>("Textures\\Players\\ness_walk_right");
-            player.Initialize(this, texture, playerPosition);
+            player.Initialize(this, playerPosition);
         }
 
         /// <summary>
@@ -87,7 +86,7 @@ namespace Pinflower
             base.Draw(gameTime);
 
             spriteBatch.Begin();
-            player.Draw(spriteBatch);
+            player.Draw(gameTime, spriteBatch);
             spriteBatch.End();
         }
     }
