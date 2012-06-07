@@ -1,8 +1,5 @@
-using System;
-
 namespace Pinflower
 {
-#if WINDOWS || XBOX
     static class Program
     {
         /// <summary>
@@ -16,6 +13,5 @@ namespace Pinflower
             }
         }
     }
-#endif
 }
 
