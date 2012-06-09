@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -41,6 +43,8 @@ namespace Pinflower
         // Level game state.
         private Random random = new Random(354668); // Arbitrary, but constant seed
         private float cameraPosition;
+
+        protected Keys RotationKey = Keys.U;
 
         public int Score
         {
@@ -97,7 +101,7 @@ namespace Pinflower
             layers[0] = new Layer(Content, "Backgrounds/Layer0", 0.2f);
             layers[1] = new Layer(Content, "Backgrounds/Layer1", 0.5f);
             layers[2] = new Layer(Content, "Backgrounds/Layer2", 0.8f);
-            
+
             // Load sounds.
             exitReachedSound = Content.Load<SoundEffect>("Sounds/ExitReached");
         }
@@ -360,18 +364,89 @@ namespace Pinflower
 
         #region Update
 
+        protected double lastRotationTime = 0;
+        const double rotationCooldown = 3.0d; // seconds
+        public bool IsRotationReady(GameTime gameTime)
+        {
+            return (gameTime.TotalGameTime.TotalSeconds - lastRotationTime) > rotationCooldown;
+        }
+
+        int surfaceLength = 5;
+        int surfaceHeight = 5;
+        int surfaceCols = 3;
+        int surfaceRows = 3;
+        protected Rectangle GetRectangleForTile(int x, int y)
+        {
+            return new Rectangle(x - (int)Math.Truncate(surfaceLength / 2.0), y - (int)Math.Truncate(surfaceHeight / 2.0), surfaceLength, surfaceHeight);
+        }
+
+        protected Rectangle GetRectangleForTile(double x, double y)
+        {
+            return GetRectangleForTile((int)x, (int)y);
+        }
+
+        protected void MoveTile(Tile[,] srcArray, Rectangle srcRect, Tile[,] dstArray, Rectangle dstRect)
+        {
+            Debug.Assert(srcRect.Width == dstRect.Width);
+            Debug.Assert(srcRect.Height == dstRect.Height);
+            for (int j = 0; j < srcRect.Height; j++)
+            {
+                for (int i = 0; i < srcRect.Width; i++)
+                {
+                    dstArray[dstRect.X + i, dstRect.Y + j] = srcArray[srcRect.X + i, srcRect.Y + j];
+                }
+            }
+        }
+
+        protected void RotateWorld(GameTime gameTime)
+        {
+            Vector2 playerTile = new Vector2(Player.Position.X / Tile.Width, Player.Position.Y / Tile.Height);
+            if (playerTile.X < Math.Ceiling(surfaceLength * surfaceCols / 2.0) ||
+                playerTile.X > Width - Math.Ceiling(surfaceLength * surfaceCols / 2.0) ||
+                playerTile.Y < Math.Ceiling(surfaceHeight * surfaceRows / 2.0) ||
+                playerTile.Y > Height - Math.Ceiling(surfaceHeight * surfaceRows / 2.0))
+            {
+                return;
+            }
+
+            var readFrom = new List<Rectangle>(8);
+            readFrom.Add(GetRectangleForTile(playerTile.X - surfaceLength, playerTile.Y - surfaceLength));
+            readFrom.Add(GetRectangleForTile(playerTile.X                , playerTile.Y - surfaceLength));
+            readFrom.Add(GetRectangleForTile(playerTile.X + surfaceLength, playerTile.Y - surfaceLength));
+            readFrom.Add(GetRectangleForTile(playerTile.X + surfaceLength, playerTile.Y                ));
+            readFrom.Add(GetRectangleForTile(playerTile.X + surfaceLength, playerTile.Y + surfaceLength));
+            readFrom.Add(GetRectangleForTile(playerTile.X                , playerTile.Y + surfaceLength));
+            readFrom.Add(GetRectangleForTile(playerTile.X - surfaceLength, playerTile.Y + surfaceLength));
+            readFrom.Add(GetRectangleForTile(playerTile.X - surfaceLength, playerTile.Y                ));
+
+            Tile[,] swap = new Tile[surfaceLength, surfaceHeight];
+            MoveTile(tiles, readFrom.First(), swap, new Rectangle(0, 0, surfaceLength, surfaceHeight));
+            for (int i = 1; i < readFrom.Count; i++)
+            {
+                MoveTile(tiles, readFrom[i], tiles, readFrom[i - 1]);
+            }
+            MoveTile(swap, new Rectangle(0, 0, surfaceLength, surfaceHeight), tiles, readFrom.Last());
+
+            lastRotationTime = gameTime.TotalGameTime.TotalSeconds;
+        }
+
         /// <summary>
         /// Updates all objects in the world, performs collision between them,
         /// and handles the time limit with scoring.
         /// </summary>
         public void Update(
-            GameTime gameTime, 
-            KeyboardState keyboardState, 
-            GamePadState gamePadState, 
-            TouchCollection touchState, 
+            GameTime gameTime,
+            KeyboardState keyboardState,
+            GamePadState gamePadState,
+            TouchCollection touchState,
             AccelerometerState accelState,
             DisplayOrientation orientation)
         {
+            if (keyboardState.IsKeyDown(RotationKey) && IsRotationReady(gameTime))
+            {
+                RotateWorld(gameTime);
+            }
+
             // Pause while the player is dead or time is expired.
             if (!Player.IsAlive || TimeRemaining == TimeSpan.Zero)
             {
@@ -582,12 +657,15 @@ namespace Pinflower
 
             // Calculate how far to scroll when the player is near the edges of the screen.
             float cameraMovement = 0.0f;
-            if (Player.Position.X < marginLeft) {
+            if (Player.Position.X < marginLeft)
+            {
                 cameraMovement = Player.Position.X - marginLeft;
-            } else if (Player.Position.X > marginRight) {
+            }
+            else if (Player.Position.X > marginRight)
+            {
                 cameraMovement = Player.Position.X - marginRight;
             }
-            
+
             // Update the camera position, but prevent scrolling off the ends of the level.
             float maxCameraPosition = Tile.Width * Width - viewport.Width;
             cameraPosition = MathHelper.Clamp(cameraPosition + cameraMovement, 0.0f, maxCameraPosition);
